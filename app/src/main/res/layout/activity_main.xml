@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Zoomable Game Map -->
+    <com.example.maptest.ZoomImageView
+        android:id="@+id/mapImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/london_map"/>
+
+    <!-- Floating game control buttons -->
+    <LinearLayout
+        android:id="@+id/controlPanel"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:padding="16dp"
+        android:background="@android:color/darker_gray"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:alpha="0.8"> <!-- Makes buttons slightly transparent -->
+
+        <!-- Button to zoom in -->
+        <Button
+            android:id="@+id/buttonZoomIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Zoom In" />
+
+        <!-- Button to zoom out -->
+        <Button
+            android:id="@+id/buttonZoomOut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Zoom Out" />
+
+        <!-- Button to snap to player's location -->
+        <Button
+            android:id="@+id/buttonSnapToPlayer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Snap to Player" />
+
+    </LinearLayout>
+
+</RelativeLayout>
