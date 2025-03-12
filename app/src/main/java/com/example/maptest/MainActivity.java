@@ -28,6 +28,10 @@ public class MainActivity extends AppCompatActivity {
         buttonZoomOut = findViewById(R.id.buttonZoomOut);
         buttonSnapToPlayer = findViewById(R.id.buttonSnapToPlayer);
 
+        // Add nodes to the map
+//        mapImageView.addNode(new Node(500, 300));
+//        mapImageView.addNode(new Node(800, 500));
+
         // Set up button click listeners
 
         // Zoom In Button
@@ -50,4 +54,5 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 }
+
 

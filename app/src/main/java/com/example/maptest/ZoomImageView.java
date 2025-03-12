@@ -1,15 +1,22 @@
 package com.example.maptest;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import androidx.appcompat.widget.AppCompatImageView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ZoomImageView extends AppCompatImageView {
     private Matrix matrix = new Matrix();
@@ -30,20 +37,122 @@ public class ZoomImageView extends AppCompatImageView {
     private ScaleGestureDetector scaleDetector;
     private GestureDetector gestureDetector;
 
+    private List<Node> nodes = new ArrayList<>(); // List of nodes to be drawn
+
     public ZoomImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    private void init() {
+    public void init() {
         setScaleType(ScaleType.MATRIX);
         matrix.setTranslate(0, 0);
         setImageMatrix(matrix);
 
         scaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
         gestureDetector = new GestureDetector(getContext(), new GestureListener());
+
+        // Hardcoded test nodes (Replace this with actual database loading later)
+        addNode(new Node(1, 291, 62));
+        addNode(new Node(2, 745, 31));
+        addNode(new Node(3, 1033, 39));
+        addNode(new Node(4, 1209, 23));
+        addNode(new Node(5, 1917, 46));
+        addNode(new Node(6, 2136, 45));
+        addNode(new Node(7, 2358, 56));
+
+        // Add test nodes at extreme points
+        addNode(new Node(8,1, 1));             // Top-left corner of the original map
+        addNode(new Node(9,1000, 1));          // Top-right
+        addNode(new Node(10, 1, 1000));          // Bottom-left
+        addNode(new Node(11, 1000, 1000));       // Bottom-right
+        addNode(new Node(12, 500, 500));         // Center (if the original map is 1000x1000)
+
+
+        Log.d("ZoomImageView", "Nodes added: " + nodes.size());  // Debugging
+
     }
 
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        Drawable drawable = getDrawable();
+        if (drawable == null) return;
+
+
+
+        // Get the original image dimensions
+        int intrinsicWidth = drawable.getIntrinsicWidth();
+        int intrinsicHeight = drawable.getIntrinsicHeight();
+
+        Log.d("ZoomImageView", "Image IntrinsicWidth=" + intrinsicWidth + "Image InstrinsicHeight=" + intrinsicHeight);
+
+        // Get the transformed image bounds
+        RectF imageBounds = getImageBounds();
+
+        Log.d("ZoomImageView", "Image Bounds: Left=" + imageBounds.left +
+                ", Top=" + imageBounds.top +
+                ", Width=" + imageBounds.width() +
+                ", Height=" + imageBounds.height());
+
+        float imageLeft = imageBounds.left;
+        float imageTop = imageBounds.top;
+        float imageWidth = 2517;
+        float imageHeight = 1895;
+
+        // Scaling factors based on the displayed image
+        float scaleX = intrinsicWidth / imageWidth;
+        float scaleY = intrinsicHeight / imageHeight;
+
+        // Paint for transparent circles
+        Paint transparentPaint = new Paint();
+        transparentPaint.setColor(Color.BLACK);
+        transparentPaint.setStyle(Paint.Style.FILL);
+        transparentPaint.setAlpha(80);
+
+        // Paint for node numbers
+        Paint textPaint = new Paint();
+        textPaint.setColor(Color.WHITE);
+        textPaint.setTextSize(70);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+
+        for (Node node : nodes) {
+            // Correctly scale and position the nodes
+            float transformedX = imageLeft + (node.getX() * scaleX);
+            float transformedY = imageTop + (node.getY() * scaleY);
+
+            // Debugging logs
+            Log.d("ZoomImageView", "Node " + node.getNumber() + " -> Map(" + node.getX() + "," + node.getY() +
+                    ") -> Image(" + transformedX + "," + transformedY + ")");
+
+            // Draw transparent node
+            canvas.drawCircle(transformedX - 124, transformedY, 100, transparentPaint);
+
+            // Draw text above node
+            canvas.drawText(String.valueOf(node.getNumber()), transformedX - 124, transformedY + 20, textPaint);
+        }
+    }
+
+
+
+
+
+
+    // Method to add a node
+    public void addNode(Node node) {
+        nodes.add(node);
+        invalidate(); // Redraw the view
+    }
+
+    // Method to remove a node
+    public void removeNode(Node node) {
+        nodes.remove(node);
+        invalidate(); // Redraw the view
+    }
+
+    // Existing code to handle zooming, dragging, and other functionality...
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         scaleDetector.onTouchEvent(event);
@@ -117,6 +226,7 @@ public class ZoomImageView extends AppCompatImageView {
 
     private void limitDragBounds() {
         RectF bounds = getImageBounds();
+
         float deltaX = 0, deltaY = 0;
 
         // Check horizontal bounds
@@ -156,6 +266,7 @@ public class ZoomImageView extends AppCompatImageView {
 
         return new RectF(left, top, right, bottom);
     }
+
     public void zoomTo(float newScale) {
         float scaleFactor = newScale / scale;  // Calculate scale factor
         scale = newScale;
@@ -185,5 +296,4 @@ public class ZoomImageView extends AppCompatImageView {
         limitDragBounds();
         setImageMatrix(matrix);
     }
-
 }
